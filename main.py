@@ -17,7 +17,7 @@ def run():
     @bot.event
     async def on_ready():
         print(f"We're online baby!")
-        logger.info(f"User: {bot.user} (ID: {bot.user.id})")
+        logger.info(f"User: {bot.user} (ID: {bot.user.id})") # type: ignore
         
     @bot.hybrid_command(
         help="Syncs slash commands to server",
@@ -84,7 +84,7 @@ def run():
         await ctx.send(f"Question: {question}\nAnswer: {random.choice(responses)}")
 # END // FUN Commands
     
-    bot.run(settings.DISCORD_API_SECRET, root_logger=True)
+    bot.run(settings.DISCORD_API_SECRET, root_logger=True) # type: ignore
 
 if __name__ == "__main__":
     run()
