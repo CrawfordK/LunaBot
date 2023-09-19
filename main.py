@@ -1,11 +1,14 @@
-import os
-import sys
 import settings
+from settings import os, sys, random, string, aiohttp, re
+import filters
 import discord
-import random
 from discord.ext import commands
-from string import ascii_lowercase, digits
-from random import choice, shuffle
+from discord.ext.commands import bot, has_permissions, MissingPermissions, is_owner
+from discord.utils import get
+from twitchAPI.twitch import Twitch
+from twitchAPI.helper import first
+import asyncio
+import json
 
 logger = settings.logging.getLogger("bot")
 
@@ -63,7 +66,27 @@ def run():
 #        await ctx.send("This is a hybrid command!")
 # END // Slash Command Template
 
+# START // No Prefix Commands
+    @bot.event
+    async def on_message(message):
+        if message.author == bot.user:  # skip bot messages
+            return
+ 
+        if message.content.lower() in filters.greetings:
+            await message.reply('Yo! Sup?')
+ 
+        if message.content.lower() in filters.suspect_words:
+            await message.channel.send(f"{message.author.mention} https://media.tenor.com/KO81J6pNN2AAAAAC/back-away.gif")
+                   
+        if message.content.lower() in filters.filtered_words:
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} The fucks wrong with you?")
+
+        await bot.process_commands(message)  # to allow other commands
+# End // No Prefix Commands
+
 # START // FUN Commands
+
     @bot.hybrid_command(
         aliases=['p'],
         help="Simple ping pong game",
@@ -71,6 +94,7 @@ def run():
         brief="Ping pong!"
     )
     async def ping(ctx):
+        """ Answers with pong """
         await ctx.send("pong")  
               
     @bot.hybrid_command(
@@ -79,9 +103,20 @@ def run():
         description="Long description",
         brief="Short description"
     )
-    async def eightball(ctx, *,question):
+    async def eightball(ctx, *, question):
         responses=["Yes","No","Maybe","Reply hazy, try again","Don't count on it","Outlook is good","Signs point to yes","Concentrate and ask again","Cannot predict now","Ask again later","My sources say no","Very doubtful"]
         await ctx.send(f"Question: {question}\nAnswer: {random.choice(responses)}")
+        
+    @bot.hybrid_command(
+        aliases=['simonsays'],
+        help="Help description",
+        description="Long description",
+        brief="Short description"
+    )
+    async def says(ctx, *what):
+        """ Game of Simon Says """
+        await ctx.send(" " .join(what)) 
+        
 # END // FUN Commands
     
     bot.run(settings.DISCORD_API_SECRET, root_logger=True) # type: ignore
